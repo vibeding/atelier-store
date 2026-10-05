@@ -1,26 +1,346 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design system: restrained luxury-editorial.
+ * Monochrome palette, hairline borders, square corners, uppercase tracked
+ * micro-type for UI, light-weight display type, generous whitespace and
+ * product imagery on a quiet neutral ground.
+ */
+
+/* ---------- Tokens ---------- */
+@theme {
+  /* Fonts (variables set in layout.tsx) */
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
+
+  /* Colors: neutrals only, one muted accent for status */
+  --color-canvas: #ffffff;
+  --color-surface: #f6f5f3; /* product image ground, panels */
+  --color-surface-strong: #ecebe8;
+  --color-ink: #121212;
+  --color-ink-muted: #6b6b6b;
+  --color-ink-subtle: #9a9a9a;
+  --color-line: #e3e2df; /* hairline borders */
+  --color-line-strong: #121212;
+  --color-accent: #8c1c13; /* sale / error, use sparingly */
+  --color-focus: #121212;
+
+  /* Type scale: small UI steps stay small, display steps are fluid */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-display-sm: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --text-display-sm--line-height: 1.2;
+  --text-display-md: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+  --text-display-md--line-height: 1.1;
+  --text-display-lg: clamp(2.75rem, 1.6rem + 4.6vw, 5.5rem);
+  --text-display-lg--line-height: 1.02;
+
+  --tracking-caps: 0.14em;
+  --tracking-caps-wide: 0.22em;
+
+  /* Spacing: 4px base (Tailwind default) plus named layout rhythm */
+  --spacing-gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+  --spacing-section: clamp(3rem, 2rem + 4vw, 7rem);
+  --spacing-header: 3.5rem;
+
+  /* Containers */
+  --container-page: 90rem; /* 1440px full-bleed-ish grid */
+  --container-content: 75rem;
+  --container-narrow: 40rem;
+
+  /* Borders & radius: square by default */
+  --radius-none: 0;
+  --radius-pill: 9999px;
+  --border-width-hairline: 1px;
+
+  /* Breakpoints */
+  --breakpoint-xs: 30rem;
+
+  /* Motion */
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: var(--ease-luxe);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: var(--spacing-header);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  img, picture, video, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: var(--border-width-hairline) solid var(--color-line);
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  button, [role="button"], summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------- Layout primitives ---------- */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility container-content {
+  width: 100%;
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility container-narrow {
+  width: 100%;
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Vertical rhythm between page sections */
+@utility section {
+  padding-block: var(--spacing-section);
+}
+
+/* Product grid: 2 columns on phones, 4 from tablet up, tight gaps */
+@utility product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 4px;
+    row-gap: 4px;
+  }
+}
+
+/* Image frame on a quiet neutral ground, portrait by default */
+@utility media-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--color-surface);
+  & > img, & > picture, & > video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Horizontal scroller that bleeds to the viewport edge on mobile */
+@utility scroll-row {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  & > * {
+    flex: 0 0 min(78%, 20rem);
+    scroll-snap-align: start;
+  }
+}
+
+/* ---------- Typography ---------- */
+/* Uppercase tracked micro-type: navigation, labels, buttons */
+@utility text-eyebrow {
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@utility text-nav {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+@utility text-display-sm-style {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-sm);
+  line-height: var(--text-display-sm--line-height);
+  letter-spacing: -0.005em;
+}
+
+@utility text-display {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-md);
+  line-height: var(--text-display-md--line-height);
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+@utility text-hero {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-lg);
+  line-height: var(--text-display-lg--line-height);
+  letter-spacing: -0.015em;
+  font-weight: 300;
+}
+
+/* ---------- Components ---------- */
+@layer components {
+  /* Buttons: rectangular, hairline, uppercase tracked label */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    min-height: 3rem;
+    padding: 0.75rem 2rem;
+    border: var(--border-width-hairline) solid var(--color-ink);
+    border-radius: var(--radius-none);
+    font-size: var(--text-xs);
+    line-height: 1;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--color-ink);
+    transition-property: background-color, color, border-color, opacity;
+  }
+  .btn:hover { background: var(--color-ink); color: var(--color-canvas); }
+  .btn:disabled, .btn[aria-disabled="true"] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .btn-primary { background: var(--color-ink); color: var(--color-canvas); }
+  .btn-primary:hover { background: transparent; color: var(--color-ink); }
+
+  .btn-ghost {
+    border-color: transparent;
+    padding-inline: 0.5rem;
+  }
+  .btn-ghost:hover { background: transparent; color: var(--color-ink-muted); }
+
+  /* On-image variant: white outline, inverts to white fill */
+  .btn-light { border-color: var(--color-canvas); color: var(--color-canvas); }
+  .btn-light:hover { background: var(--color-canvas); color: var(--color-ink); }
+
+  .btn-block { display: flex; width: 100%; }
+  .btn-sm { min-height: 2.5rem; padding: 0.5rem 1.25rem; font-size: var(--text-micro); }
+
+  /* Inline text link: underline that thickens on hover */
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color 200ms var(--ease-luxe), color 200ms var(--ease-luxe);
+  }
+  .link:hover { text-decoration-thickness: 2px; color: var(--color-ink-muted); }
+
+  /* Navigation link: no underline until hover/current */
+  .link-nav {
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.5em;
+    transition: text-decoration-color 200ms var(--ease-luxe);
+  }
+  .link-nav:hover,
+  .link-nav[aria-current="page"] { text-decoration-color: currentColor; }
+
+  /* Form fields: underline-only inputs */
+  .field {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.5rem 0;
+    background: transparent;
+    border: 0;
+    border-bottom: var(--border-width-hairline) solid var(--color-line-strong);
+    border-radius: var(--radius-none);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+  }
+  .field::placeholder { color: var(--color-ink-subtle); }
+  .field:focus-visible { outline: none; border-bottom-width: 2px; }
+
+  /* Hairline dividers and framed boxes */
+  .rule { border-top: var(--border-width-hairline) solid var(--color-line); }
+  .rule-b { border-bottom: var(--border-width-hairline) solid var(--color-line); }
+  .box { border: var(--border-width-hairline) solid var(--color-line); }
+
+  /* Product card: image on neutral ground, small caps-free meta below */
+  .product-card { display: block; }
+  .product-card .media-frame img { transition: transform 600ms var(--ease-luxe); }
+  .product-card:hover .media-frame img { transform: scale(1.03); }
+  .product-card__meta {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem 0.75rem 1.5rem;
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
+  }
+  .product-card__price { color: var(--color-ink-muted); }
+
+  /* Sticky site header shell: hairline bottom, white ground */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: var(--spacing-header);
+    background: var(--color-canvas);
+    border-bottom: var(--border-width-hairline) solid var(--color-line);
+  }
 }

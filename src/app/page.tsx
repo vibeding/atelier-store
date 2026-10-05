@@ -1,69 +1,178 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ProductCard } from "@/components/product-card";
+import { collections, editorialImage, heroImage, services } from "@/data/catalog";
+import { getProducts } from "@/db/queries";
 
-export default function Home() {
+// Stock is read from the database; refresh the prerendered page every minute.
+export const revalidate = 60;
+
+export default async function Home() {
+  const products = await getProducts();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <>
+        {/* Hero: full-bleed editorial image, copy anchored bottom-left */}
+        <section className="relative isolate flex min-h-[min(78svh,40rem)] items-end overflow-hidden bg-surface-strong text-canvas lg:min-h-[min(calc(100svh-6rem),52rem)]">
+          <Image
+            src={heroImage.src}
+            alt={heroImage.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="-z-10 object-cover object-[50%_20%]"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-gradient-to-t from-black/60 via-black/10 to-transparent"
+          />
+          <div className="container-page pb-10 sm:pb-16">
+            <p className="text-eyebrow">Autumn / Winter</p>
+            <h1 className="text-hero mt-4 max-w-3xl">The Quiet Luxury Edit</h1>
+            <p className="mt-5 max-w-md text-base">
+              Soft tailoring, rich texture and a palette made for the cold months.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="#" className="btn btn-light">
+                Shop the edit
+              </Link>
+              <Link href="#" className="btn btn-light">
+                Discover outerwear
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured collections */}
+        <section className="section" aria-labelledby="collections-title">
+          <div className="container-page">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-eyebrow text-ink-muted">Featured collections</p>
+                <h2 id="collections-title" className="text-display mt-3">
+                  Explore the season
+                </h2>
+              </div>
+              <Link href="#" className="link-nav hidden sm:inline">
+                View all
+              </Link>
+            </div>
+            <ul className="grid gap-1 sm:grid-cols-3">
+              {collections.map((c, i) => (
+                <li key={c.slug}>
+                  <Link href="#" className="group block">
+                    <div className="media-frame aspect-[3/4]">
+                      <Image
+                        src={c.image}
+                        alt={c.alt}
+                        fill
+                        priority={i === 0}
+                        sizes="(min-width: 40rem) 33vw, 100vw"
+                        className="transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <h3 className="text-nav py-4 underline decoration-transparent decoration-1 underline-offset-[0.5em] transition-[text-decoration-color] group-hover:decoration-current">
+                      {c.title}
+                    </h3>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Featured products */}
+        <section className="pb-[var(--spacing-section)]" aria-labelledby="products-title">
+          <div className="container-page">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-eyebrow text-ink-muted">New arrivals</p>
+                <h2 id="products-title" className="text-display mt-3">
+                  Pieces to live in
+                </h2>
+              </div>
+              <Link href="#" className="link-nav">
+                Shop all
+              </Link>
+            </div>
+            <div className="product-grid">
+              {products.map((p, i) => (
+                <ProductCard key={p.slug} product={p} priority={i < 2} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Editorial split */}
+        <section className="bg-surface" aria-labelledby="editorial-title">
+          <div className="mx-auto grid max-w-page lg:grid-cols-2">
+            <div className="media-frame aspect-[4/3] lg:aspect-auto lg:min-h-[36rem]">
+              <Image
+                src={editorialImage.src}
+                alt={editorialImage.alt}
+                fill
+                sizes="(min-width: 64rem) 50vw, 100vw"
+              />
+            </div>
+            <div className="flex flex-col justify-center gap-6 px-[var(--spacing-gutter)] py-14 lg:px-20">
+              <p className="text-eyebrow text-ink-muted">The wardrobe</p>
+              <h2 id="editorial-title" className="text-display">
+                Built from the basics up
+              </h2>
+              <p className="max-w-md text-base text-ink-muted">
+                Natural fibres, honest cuts and neutral tones that layer together.
+                Start with the essentials and build a wardrobe that lasts.
+              </p>
+              <div>
+                <Link href="#" className="btn btn-primary">
+                  Explore essentials
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Client services */}
+        <section aria-label="Client services">
+          <ul className="container-page grid sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((s) => (
+              <li
+                key={s.title}
+                className="rule-b border-line py-8 sm:px-6 sm:first:pl-0 lg:border-b-0 lg:border-l lg:first:border-l-0"
+              >
+                <h3 className="text-eyebrow">{s.title}</h3>
+                <p className="mt-2 text-sm text-ink-muted">{s.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Newsletter */}
+        <section className="rule section" aria-labelledby="newsletter-title">
+          <div className="container-narrow text-center">
+            <h2 id="newsletter-title" className="text-display-sm-style">
+              Letters from Atelier
+            </h2>
+            <p className="mt-3 text-sm text-ink-muted">
+              New collections and private events, delivered occasionally.
+            </p>
+            <form className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end">
+              <label className="flex-1 text-left">
+                <span className="sr-only">Email address</span>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="Email address"
+                  className="field"
+                />
+              </label>
+              <button type="submit" className="btn btn-primary">
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </section>
+    </>
   );
 }
